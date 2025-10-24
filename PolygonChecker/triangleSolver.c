@@ -1,50 +1,52 @@
 #include <stdio.h>
-#include <stdbool.h>
-#include <math.h> 
+#include <math.h>
 #include "triangleSolver.h"
 
-#define PI 3.14159265
+#define PI 3.14159265359
 
 char* analyzeTriangle(int side1, int side2, int side3) {
-    char* result = "";
-
-    if (side1 <= 0 || side2 <= 0 || side3 <= 0 ||
-        (side1 + side2 <= side3) || (side1 + side3 <= side2) || (side2 + side3 <= side1)) {
-        result = "Not a Triangle";
-        return result;
+    // Input validation
+    if (side1 <= 0 || side2 <= 0 || side3 <= 0) {
+        return "Invalid input: sides must be positive";
     }
-
-    // Determine the type of triangle
-    if (side1 == side2 && side1 == side3) {
-        result = "Equilateral Triangle";
+    
+    if (side1 == -1) {
+        return "Invalid input format";
     }
-    else if ((side1 == side2 && side1 != side3) ||
-        (side1 == side3 && side1 != side2) ||
-        (side2 == side3 && side2 != side1)) {
-        result = "Isosceles Triangle";
+    
+    // Triangle inequality check
+    if ((side1 + side2 <= side3) || (side1 + side3 <= side2) || (side2 + side3 <= side1)) {
+        return "Not a triangle: violates triangle inequality";
     }
-    else {
-        result = "Scalene Triangle";
+    
+    // Determine triangle type
+    char* triangleType;
+    if (side1 == side2 && side2 == side3) {
+        triangleType = "Equilateral triangle";
+    } else if (side1 == side2 || side1 == side3 || side2 == side3) {
+        triangleType = "Isosceles triangle";
+    } else {
+        triangleType = "Scalene triangle";
     }
-
-    printf_s("Triangle type: %s\n", result);
-
-    // Calculate angles using the law of cosines
+    
+    // Calculate and display angles
     double angle1 = calculateAngle(side2, side3, side1);
     double angle2 = calculateAngle(side1, side3, side2);
     double angle3 = calculateAngle(side1, side2, side3);
-
-    printf_s("Angles (in degrees):\n");
-    printf_s("Angle 1: %.2f\n", angle1);
-    printf_s("Angle 2: %.2f\n", angle2);
-    printf_s("Angle 3: %.2f\n", angle3);
-
-    return result;
+    
+    printf("Triangle type: %s\n", triangleType);
+    printf("Angles: %.2f°, %.2f°, %.2f°\n", angle1, angle2, angle3);
+    
+    return triangleType;
 }
-//Aya
+
 double calculateAngle(int a, int b, int c) {
-    // Law of cosines: cos(C) = (a^2 + b^2 - c^2) / (2ab)
+    // Law of cosines: cos(C) = (a² + b² - c²) / (2ab)
     double cosineC = (pow(a, 2) + pow(b, 2) - pow(c, 2)) / (2.0 * a * b);
-    double angleC = acos(cosineC) * (180.0 / PI); // Convert radians to degrees
-    return angleC;
+    
+    // Clamp to valid range to avoid numerical errors
+    if (cosineC > 1.0) cosineC = 1.0;
+    if (cosineC < -1.0) cosineC = -1.0;
+    
+    return acos(cosineC) * (180.0 / PI);
 }
